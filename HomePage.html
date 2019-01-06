@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>DMart</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src = "http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script type="text/javascript">
+var firstNumberOfRow = 0
+var lastNumberOfRow = 8
+// function displayRecords()
+// {
+// 	var pageNumber = document.getElementById("row_no").value;
+
+// 	$.ajax({
+// 		url: "table.jsp",
+// 		data: {pageNo: pageNumber},
+// 		success: function(res){
+// 			$("#result").append(res);
+// 			document.getElementById("row_no").value = Number(pageNumber)+10;
+// 		}
+// 	});
+// }
+
+// $(window).scroll(function ()
+// {
+//     if($(window).scrollTop() == $(document).height() - $(window).height())
+// 	{
+// 		mainTable();
+// 	}
+// });
+
+function deleteRecord(input) 
+{
+	var xhttp = new XMLHttpRequest();
+	var URL = "deleteItem.jsp?item_id="+input;
+	var deleteStatus = confirm("To delete "+input+" item click on OK!");
+	if (deleteStatus == true) 
+	{
+		console.log(URL);
+		xhttp.onreadystatechange = function() 
+		{
+			if (this.readyState == 4 && this.status == 200) 
+			{
+				mainTable()
+			}
+		};
+		xhttp.open("GET", URL, true);
+		xhttp.send();
+	}
+}
+
+function editRecord(input)
+{
+	document.getElementById("editBox").style.display = 'block'; 
+	var Row = document.getElementById(input);
+	var Cells = Row.getElementsByTagName("td");
+	$("#Edit_item_id").val(Cells[0].innerText)
+ 	$("#Edit_description").val(Cells[1].innerText)
+ 	$("#Edit_unit_price").val(Cells[2].innerText)
+ 	$("#Edit_stock_qty").val(0)
+ 	$("#Edit_supplier_id").val(Cells[4].innerText)
+ 	$('#item_id').val("")
+}
+
+function insertData() 
+{
+	var tableEdited = false
+	var xhttp = new XMLHttpRequest();
+	var URL = "insert.jsp?item_id="+$('#item_id').val()+"&description="+$('#description').val()+"&unit_price="+$('#unit_price').val()+"&stock_qty="+$('#stock_qty').val()+"&supplier_id="+$('#supplier_id').val();
+	if (document.getElementById("item_id").value == "") 
+	{
+		URL = "insert.jsp?item_id="+$('#Edit_item_id').val()+"&description="+$('#Edit_description').val()+"&unit_price="+$('#Edit_unit_price').val()+"&stock_qty="+$('#Edit_stock_qty').val()+"&supplier_id="+$('#Edit_supplier_id').val();
+		tableEdited = true
+	}
+	console.log(URL);
+	xhttp.onreadystatechange = function() 
+	{
+		if (this.readyState == 4 && this.status == 200) 
+		{
+			mainTable()
+			if (tableEdited) 
+			{
+				location.reload(true);
+			}
+		}
+	};
+	xhttp.open("GET", URL, true);
+	xhttp.send();
+}
+function scrollDetect(){
+var lastScroll = 0;
+var scrollPosition = 0;
+  window.onscroll = function() {
+      let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+
+		if (currentScroll > 0 && lastScroll <= currentScroll)
+		{
+	        lastScroll = currentScroll;
+	        scrollPosition =scrollPosition+1;
+	        // if (scrollPosition%2 == 0) 
+	        // {
+	        	firstNumberOfRow = lastNumberOfRow;
+	        	lastNumberOfRow = lastNumberOfRow + 4;
+	        	// alert(scrollPosition)
+	        	mainTable(firstNumberOfRow, lastNumberOfRow)
+            	// $('#mainTable').childs('tr').append(mainTable());
+	        // }
+    	}
+	};
+}
+
+
+scrollDetect();
+function mainTable(firstNumberOfRow = 0, lastNumberOfRow = 8)
+{
+	$.ajax(
+	{
+	    type: "GET",
+	    url: "table.jsp?first="+firstNumberOfRow+"&last="+lastNumberOfRow,
+	    data: { },
+	    success: function(data){
+	    	if (firstNumberOfRow == 0) {$('#mainTable tbody').html(data);}
+	    	else {$('#mainTable tbody').append(data);}
+	        
+	    }
+	});
+}
+
+ 
+</script>
+<style type="text/css">
+th, td {
+  padding: 15px;
+  text-align: left;
+}
+#editBox
+{
+	height:4cm;
+	width:8cm;
+	margin-top: -4cm;
+	margin-left: 26.5cm;
+	background-color: #808090;
+	box-shadow: black;
+}
+p
+{
+	width: 4cm;
+	position:absolute;
+}
+input[type="text"], input[type="number"]
+{
+	margin-left: 3cm;
+}
+#bottomOfTheTable
+{
+	height: 2cm;
+}
+</style>
+</head>
+<body onload="mainTable()">
+<div name="fillers">
+<form>
+	<p>Item Id: </p><input type="text" id="item_id" placeholder="Enter Item Id" name="item_id"><br>
+	<p>Description: </p><input type="text" id="description" placeholder="Enter Description" name="description" ><br>
+	<p>Unit price: </p><input type="number" id="unit_price" placeholder="Enter Unit price" name="unit_price" ><br>
+	<p>Stock Quantity: </p><input type="number" id="stock_qty" placeholder="Enter Stock quantity" name="stock_qty" ><br>
+	<p>Supplier Id: </p><input type="text" id="supplier_id" placeholder="Enter Supplier Id" name="supplier_id"><br>
+	<input type="reset" value="reset"><input type="submit" value="save" onclick="insertData() ">
+</form>
+</div>
+<div id="updateTable"></div>
+<div name="fillers" id="editBox" style="display:none;">
+
+	<button style="background-color: red;margin-left: 7cm;border-color: transparent;" onclick="document.getElementById('editBox').style.display = 'none'">x</button>
+
+	<input type="text" id="Edit_item_id" placeholder="Enter Item Id" name="item_id" style="display: none;"><br>
+	<p>Description: </p><input type="text" id="Edit_description" placeholder="Enter Description" name="description" ><br>
+	<p>Unit price: </p><input type="number" id="Edit_unit_price" placeholder="Enter Unit price" name="unit_price" ><br>
+	<p>Stock Quantity: </p><input type="number" id="Edit_stock_qty" placeholder="Enter Stock quantity" name="stock_qty" ><br>
+	<input type="text" id="Edit_supplier_id" placeholder="Enter Supplier Id" name="supplier_id" style="display: none;"><br>
+	<input type="submit" value="save" onclick="insertData()">
+</div>
+<table id="mainTable" border=1 width='100%'><tbody></tbody></table>
+<div id="bottomOfTheTable"></div>
+</body>
+</html>
