@@ -5,7 +5,7 @@ try
 	Connection connection = null;
 	Statement statement = null;
 	Class.forName("com.mysql.jdbc.Driver");
-	connection = DriverManager.getConnection("jdbc:mysql://192.241.244.177/db_Abhi_DMart","root", "tecnics");
+	connection = DriverManager.getConnection("URL","root", "password");
 	String query = "select * from Items_view1 limit "+request.getParameter("first")+","+request.getParameter("last")+";";
 	statement = connection.createStatement();
 	ResultSet rs = statement.executeQuery(query);
